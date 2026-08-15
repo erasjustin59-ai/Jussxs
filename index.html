@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Finanzas + Calculadora</title>
+  <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --green: #22c55e;
+            --red: #ef4444;
+            --primary: #3b82f6;
+            --border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--text-color);
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Targetas de Balance */
+        .balance-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .balance-card span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .balance-card h2 {
+            font-size: 2.2rem;
+            margin: 5px 0 15px 0;
+            color: #fff;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+        }
+
+        .stat-item h3 {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .stat-item p {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 2px;
+        }
+
+        .income { color: var(--green); }
+        .expense { color: var(--red); }
+
+        /* Calculadora Integrada */
+        .calc-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 15px;
+        }
+
+        .calc-card h3 {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .calc-screen {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: right;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 10px;
+            min-height: 45px;
+            overflow-x: auto;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .calc-btn {
+            background: #0f172a;
+            color: #fff;
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .calc-btn:hover { background: #334155; }
+        .calc-btn.op { color: var(--primary); }
+        .calc-btn.danger { color: var(--red); }
+        .calc-btn.action { background: var(--primary); color: white; border: none; }
+        .calc-btn.use-btn {
+            grid-column: span 4;
+            background: #16a34a;
+            color: white;
+            border: none;
+            margin-top: 4px;
+        }
+
+        /* Formulario de Registro */
+        .form-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #0f172a;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+        }
+
+        .row-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn-add {
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 5px;
+        }
+
+        .btn-add:hover { background: #2563eb; }
+
+        /* Historial */
+        .history-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .history-card h3 {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: var(--text-muted);
+        }
+
+        .transaction-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #0f172a;
+            border-radius: 10px;
+            border-left: 4px solid var(--border);
+        }
+
+        .transaction-item.income-type { border-left-color: var(--green); }
+        .transaction-item.expense-type { border-left-color: var(--red); }
+
+        .info div:first-child { font-weight: 600; font-size: 0.95rem; }
+        .info div:last-child { font-size: 0.75rem; color: var(--text-muted); }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .amount { font-weight: bold; font-size: 0.95rem; }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 2px;
+            width: auto;
+        }
+
+        .btn-delete:hover { color: var(--red); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Control de Finanzas 📊</h1>
+            <p>Presupuesto + Calculadora Rápida</p>
+        </header>
+
+        <!-- Balance Total -->
+        <div class="balance-card">
+            <span>Balance Disponible</span>
+            <h2 id="total-balance">$0.00</h2>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h3>Ingresos Total</h3>
+                    <p id="total-income" class="income">+$0.00</p>
+                </div>
+                <div class="stat-item">
+                    <h3>Gastos Total</h3>
+                    <p id="total-expense" class="expense">-$0.00</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculadora Rápida -->
+        <div class="calc-card">
+            <h3>🧮 Calculadora Rápida</h3>
+            <div id="calc-screen" class="calc-screen">0</div>
+            <div class="calc-grid">
+                <button class="calc-btn danger" onclick="calcClear()">C</button>
+                <button class="calc-btn op" onclick="calcAppend('/')">÷</button>
+                <button class="calc-btn op" onclick="calcAppend('*')">×</button>
+                <button class="calc-btn danger" onclick="calcBackspace()">⌫</button>
+
+                <button class="calc-btn" onclick="calcAppend('7')">7</button>
+                <button class="calc-btn" onclick="calcAppend('8')">8</button>
+                <button class="calc-btn" onclick="calcAppend('9')">9</button>
+                <button class="calc-btn op" onclick="calcAppend('-')">-</button>
+
+                <button class="calc-btn" onclick="calcAppend('4')">4</button>
+                <button class="calc-btn" onclick="calcAppend('5')">5</button>
+                <button class="calc-btn" onclick="calcAppend('6')">6</button>
+                <button class="calc-btn op" onclick="calcAppend('+')">+</button>
+
+                <button class="calc-btn" onclick="calcAppend('1')">1</button>
+                <button class="calc-btn" onclick="calcAppend('2')">2</button>
+                <button class="calc-btn" onclick="calcAppend('3')">3</button>
+                <button class="calc-btn action" onclick="calcCalculate()">=</button>
+
+                <button class="calc-btn" style="grid-column: span 2;" onclick="calcAppend('0')">0</button>
+                <button class="calc-btn" onclick="calcAppend('.')">.</button>
+                <button class="calc-btn action" onclick="calcCalculate()">=</button>
+
+                <button class="calc-btn use-btn" onclick="useCalcResult()">Usar resultado como Monto ⬇️</button>
+            </div>
+        </div>
+
+        <!-- Formulario de Registro -->
+        <div class="form-card">
+            <form id="finance-form" class="form-group">
+                <input type="text" id="desc" placeholder="Descripción (ej. Gym, Almuerzo, Sueldo)" required>
+                
+                <div class="row-inputs">
+                    <input type="number" id="amount" placeholder="Monto ($)" step="0.01" required>
+                    <select id="type">
+                        <option value="expense">Gasto (-)</option>
+                        <option value="income">Ingreso (+)</option>
+                    </select>
+                </div>
+
+                <select id="category">
+                    <option value="Comida">🍔 Comida / Alimentación</option>
+                    <option value="Gym/Salud">🏋️ Gym / Salud</option>
+                    <option value="Estudio/Universidad">📚 Estudio / Educación</option>
+                    <option value="Transporte">🚗 Transporte</option>
+                    <option value="Sueldo/Ingresos">💼 Sueldo / Ingresos</option>
+                    <option value="Varios">⚙️ Varios</option>
+                </select>
+
+                <button type="submit" class="btn-add">Registrar Movimiento</button>
+            </form>
+        </div>
+
+        <!-- Historial -->
+        <div class="history-card">
+            <h3>Historial de Movimientos</h3>
+            <ul id="transaction-list" class="transaction-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        // --- LÓGICA DE LA CALCULADORA ---
+        let calcExpr = "";
+        const calcScreen = document.getElementById('calc-screen');
+
+        function calcAppend(val) {
+            if (calcExpr === "0" && val !== ".") calcExpr = "";
+            calcExpr += val;
+            calcScreen.innerText = calcExpr || "0";
+        }
+
+        function calcClear() {
+            calcExpr = "";
+            calcScreen.innerText = "0";
+        }
+
+        function calcBackspace() {
+            calcExpr = calcExpr.slice(0, -1);
+            calcScreen.innerText = calcExpr || "0";
+        }
+
+        function calcCalculate() {
+            try {
+                if (!calcExpr) return;
+                const result = eval(calcExpr);
+                calcExpr = Number.isInteger(result) ? result.toString() : result.toFixed(2);
+                calcScreen.innerText = calcExpr;
+            } catch (e) {
+                calcScreen.innerText = "Error";
+                calcExpr = "";
+            }
+        }
+
+        function useCalcResult() {
+            calcCalculate();
+            const val = parseFloat(calcScreen.innerText);
+            if (!isNaN(val) && val > 0) {
+                document.getElementById('amount').value = val;
+                // Scroll suave hasta el formulario
+                document.getElementById('finance-form').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // --- LÓGICA DEL GESTOR FINANCIERO ---
+        let transactions = JSON.parse(localStorage.getItem('my_finances')) || [];
+
+        const form = document.getElementById('finance-form');
+        const descInput = document.getElementById('desc');
+        const amountInput = document.getElementById('amount');
+        const typeInput = document.getElementById('type');
+        const categoryInput = document.getElementById('category');
+
+        const totalBalance = document.getElementById('total-balance');
+        const totalIncome = document.getElementById('total-income');
+        const totalExpense = document.getElementById('total-expense');
+        const list = document.getElementById('transaction-list');
+
+        function updateUI() {
+            list.innerHTML = '';
+            let incomeSum = 0;
+            let expenseSum = 0;
+
+            transactions.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = `transaction-item ${item.type}-type`;
+
+                const isIncome = item.type === 'income';
+                const sign = isIncome ? '+' : '-';
+
+                if (isIncome) incomeSum += item.amount;
+                else expenseSum += item.amount;
+
+                li.innerHTML = `
+                    <div class="info">
+                        <div>${item.desc}</div>
+                        <div>${item.category}</div>
+                    </div>
+                    <div class="actions">
+                        <span class="amount ${item.type}">${sign}$${item.amount.toFixed(2)}</span>
+                        <button class="btn-delete" onclick="deleteTransaction(${index})">✕</button>
+                    </div>
+                `;
+
+                list.appendChild(li);
+            });
+
+            const netBalance = incomeSum - expenseSum;
+
+            totalBalance.innerText = `$${netBalance.toFixed(2)}`;
+            totalIncome.innerText = `+$${incomeSum.toFixed(2)}`;
+            totalExpense.innerText = `-$${expenseSum.toFixed(2)}`;
+
+            localStorage.setItem('my_finances', JSON.stringify(transactions));
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const newTransaction = {
+                desc: descInput.value,
+                amount: parseFloat(amountInput.value),
+                type: typeInput.value,
+                category: categoryInput.value
+            };
+
+            transactions.unshift(newTransaction);
+            updateUI();
+
+            descInput.value = '';
+            amountInput.value = '';
+            calcClear();
+        });
+
+        function deleteTransaction(index) {
+            transactions.splice(index, 1);
+            updateUI();
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
